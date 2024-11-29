@@ -1,0 +1,9 @@
+[package]
+name = "tray_test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tray-icon = "0.19.2"
+winit = "0.30.5"
+image = "0.25.5"
