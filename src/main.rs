@@ -1,4 +1,4 @@
-use tray_icon::{TrayIconBuilder, Icon, menu::{Menu, MenuItem, MenuEvent}};
+use tray_icon::{menu::{Menu, MenuEvent, MenuItem}, Icon, TrayIconBuilder, TrayIconEvent};
 use winit::{
     event_loop::EventLoop,
     event::Event,
@@ -8,7 +8,7 @@ fn main() {
     let event_loop: EventLoop<()> = EventLoop::new().unwrap();
 
     // 创建托盘菜单
-    let mut menu: Menu = Menu::new();
+    let menu: Menu = Menu::new();
     let show_handle: MenuItem = MenuItem::new("显示", true, None);
     let quit_handle: MenuItem = MenuItem::new("退出", true, None);
     
@@ -37,11 +37,22 @@ fn main() {
 
     println!("托盘程序已启动！");
 
-    // 创建一个事件接收器来处理菜单事件
+    // 方式1: 直接使用event_handler, 注意仍然需要有 loop 在运行
+    TrayIconEvent::set_event_handler(Some(move |event| {
+        println!("TrayIconEvent: {:?}", event);
+    }));
+
+    MenuEvent::set_event_handler(Some(move |event| {
+        println!("MenuEvent: {:?}", event);
+    }));
+
+    // 方式2: 创建一个事件接收器来处理菜单事件, 然后在 loop 中处理
     let menu_channel = MenuEvent::receiver();
     
     // 运行事件循环
     let _ = event_loop.run(move |event: Event<()>, elwt| {
+
+        // 这里配合方式2, 使用方式1则不需要
         if let Ok(menu_event) = menu_channel.try_recv() {
             match menu_event.id {
                 id if id == show_handle.id() => {
